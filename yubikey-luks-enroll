@@ -14,32 +14,32 @@ fi
 
 while getopts ":s:d:hcv" opt; do
     case $opt in
-	s)
-	    SLOT=$OPTARG
-	    echo "setting slot to $OPTARG."
-	    ;;
-	d)
-	    DISK=$OPTARG
-	    echo "setting disk to $OPTARG."
-	    ;;
-	c)  CLEAR_SLOT=1
-	    echo "clearing slot"
-	    ;;
-	v)  DBG=1
-	    echo "debugging enabled"
-	    ;;
-	h)
-	    echo
-	    echo " -d <partition>: set the partition"
-	    echo " -s <slot>     : set the slot"
-	    echo " -c            : clear the slot prior to writing"
-	    echo " -v            : show input/output in cleartext"
-	    echo
-	    exit 1
-	    ;;
-	\?)
-	    echo "Invalid option: -$OPTARG" >&2
-	    ;;
+    s)
+        SLOT=$OPTARG
+        echo "setting slot to $OPTARG."
+        ;;
+    d)
+        DISK=$OPTARG
+        echo "setting disk to $OPTARG."
+        ;;
+    c)  CLEAR_SLOT=1
+        echo "clearing slot"
+        ;;
+    v)  DBG=1
+        echo "debugging enabled"
+        ;;
+    h)
+        echo
+        echo " -d <partition>: set the partition"
+        echo " -s <slot>     : set the slot"
+        echo " -c            : clear the slot prior to writing"
+        echo " -v            : show input/output in cleartext"
+        echo
+        exit 1
+        ;;
+    \?)
+        echo "Invalid option: -$OPTARG" >&2
+        ;;
     esac
 done
 
