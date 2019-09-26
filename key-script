@@ -19,6 +19,25 @@ message()
     return 0
 }
 
+yk_challenge(){
+    local PW="$1"
+    message "Accessing yubikey..."
+    if [ "$HASH" = "1" ]; then
+        PW=$(printf %s "$PW" | sha256sum | awk '{print $1}')
+    fi
+    R="$(ykchalresp -2 "$PW" 2>/dev/null || true)"
+    if [ "$R" ]; then
+        message "Retrieved the response from the Yubikey"
+        if [ "$CONCATENATE" = "1" ]; then
+            printf '%s' "$PW$R"
+        else
+            printf '%s' "$R"
+        fi
+    else
+        message "Failed to retrieve the response from the Yubikey"
+    fi
+}
+
 check_yubikey_present="$(ykinfo -q -2)"
 
 # source for log_*_msg() functions, see LP: #272301
@@ -38,23 +57,16 @@ if [ -z "$cryptkeyscript" ]; then
     fi
 fi
 
-PW="$($cryptkeyscript "$WELCOME_TEXT")"
-
 if [ "$check_yubikey_present" = "1" ]; then
-    message "Accessing yubikey..."
-    if [ "$HASH" = "1" ]; then
-            PW=$(printf %s "$PW" | sha256sum | awk '{print $1}')
-    fi
-        R="$(ykchalresp -2 "$PW" 2>/dev/null || true)"
-    if [ "$R" ]; then
-        message "Retrieved the response from the Yubikey"
-        if [ "$CONCATENATE" = "1" ]; then
-            printf '%s' "$PW$R"
-        else
-                printf '%s' "$R"
-        fi
+    # CRYPTTAB_TRIED is a predefined environment variabe passed by crypttab.
+    # Reference: https://manpages.debian.org/testing/cryptsetup/crypttab.5.en.html
+    if [ "$CRYPTTAB_TRIED" = "0" ]; then
+        message "Trying to auto unlock the disk with empty challenge password..."
+        yk_challenge
     else
-        message "Failed to retrieve the response from the Yubikey"
+        # Auto unlock failed, now asking user for password.
+        PW="$($cryptkeyscript "$WELCOME_TEXT")"
+        yk_challenge "$PW"
     fi
 else
     printf '%s' "$PW"
